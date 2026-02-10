@@ -3,8 +3,9 @@ google-api-python-client==2.45.0
 google-auth-httplib2==0.1.0
 google-auth-oauthlib==0.4.6
 pandas==1.4.0
-pulp==2.5
 gunicorn==20.1.0
 setuptools>=59.5.0
-wheel
+wheel==0.37.1
+pip==26.0.1
+
 
