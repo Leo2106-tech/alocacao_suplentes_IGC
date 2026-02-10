@@ -4,4 +4,7 @@ google-auth-httplib2==0.1.0
 google-auth-oauthlib==0.4.6
 pandas==1.4.0
 pulp==2.5
-gunicorn==20.1.0  # Necessário para rodar no Render ou em qualquer outro serviço na nuvem
+gunicorn==20.1.0
+setuptools>=59.5.0
+wheel
+
