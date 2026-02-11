@@ -266,24 +266,63 @@ def salvar_log_na_planilha(status, link_drive):
     try:
         service = build('sheets', 'v4', credentials=creds)
         
-        import uuid
-        id_unico = str(uuid.uuid4())[:8] # Gera um ID curto 
-        agora = datetime.now().strftime("%d/%m/%Y") # Formato de data da planilha
-        
-        valores = [[id_unico, "Otimizar Suplentes Atuais", agora, link_drive]]
-        
-        body = {'values': valores}
-        
         NOME_DA_ABA = "Otimizar Alocação de Suplentes"
         
-        service.spreadsheets().values().append(
+        # 1. Ler dados existentes (A até D) para verificar status
+        range_leitura = f"'{NOME_DA_ABA}'!A5:D"
+        result = service.spreadsheets().values().get(
             spreadsheetId=SPREADSHEET_ID,
-            range=f"'{NOME_DA_ABA}'!A5", 
+            range=range_leitura
+        ).execute()
+        
+        valores = result.get('values', [])
+        
+        linha_alvo = -1
+        atualizar_apenas_link = False
+        
+        # Procura de baixo para cima a última linha que tem C preenchido e D vazio
+        for i in range(len(valores) - 1, -1, -1):
+            linha = valores[i]
+            # Verifica se tem coluna C (índice 2) e se D (índice 3) está vazia/inexistente
+            tem_c = len(linha) > 2 and str(linha[2]).strip() != ""
+            tem_d = len(linha) > 3 and str(linha[3]).strip() != ""
+            
+            if tem_c and not tem_d:
+                linha_alvo = 5 + i
+                atualizar_apenas_link = True
+                break
+        
+        # Se não achou linha pendente, define nova linha no final
+        if linha_alvo == -1:
+            linha_alvo = 5 + len(valores)
+            atualizar_apenas_link = False
+
+        # 2. Preparar os dados para escrita
+        if atualizar_apenas_link:
+            # Se for atualizar, escreve apenas na coluna D
+            valores_para_escrever = [[link_drive]]
+            range_escrita = f"'{NOME_DA_ABA}'!D{linha_alvo}"
+            print(f"   -> Atualizando link na linha {linha_alvo} (coluna D)...")
+        else:
+            # Se for nova linha, escreve A, B, C, D
+            import uuid
+            id_unico = str(uuid.uuid4())[:8] # Gera um ID curto
+            agora = datetime.now().strftime("%d/%m/%Y") # Formato de data da planilha
+            valores_para_escrever = [[id_unico, "Otimizar Suplentes Atuais", agora, link_drive]]
+            range_escrita = f"'{NOME_DA_ABA}'!A{linha_alvo}"
+            print(f"   -> Criando nova entrada na linha {linha_alvo}...")
+
+        body = {'values': valores_para_escrever}
+
+        # 3. Executar update
+        service.spreadsheets().values().update(
+            spreadsheetId=SPREADSHEET_ID,
+            range=range_escrita,
             valueInputOption="USER_ENTERED",
             body=body
         ).execute()
         
-        print(f"   Dados salvo na aba '{NOME_DA_ABA}' com sucesso!")
+        print(f"   Dados salvos na aba '{NOME_DA_ABA}', linha {linha_alvo}, com sucesso!")
         
     except Exception as e:
         print(f"   ❌ Erro ao salvar dados: {e}")
