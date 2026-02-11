@@ -685,12 +685,29 @@ def rodar_distribuicao(
 
     print("  ⏳ Otimizando...")
     try:
-        solver = pl.HiGHS(msg=True,timeLimit=300)
+        # 1ª Condição: Tenta o HiGHS padrão (espera que o binário esteja no PATH)
+        print("    -> Tentando HiGHS (Interface padrão)...")
+        solver = pl.HiGHS(msg=True, timeLimit=300)
         prob.solve(solver)
     except:
-        solver = pl.PULP_CBC_CMD(msg=True, timeLimit=300)
-        prob.solve(solver)
-
+        try:
+            # 2ª Condição: Tenta o HiGHS via binário do pacote highspy (recomendado para o Render)
+            print("    -> Tentando HiGHS (via caminho do highspy)...")
+            import highspy
+            import os
+            
+            # Localiza o binário dentro do pacote instalado pelo pip
+            path_bin = os.path.join(os.path.dirname(highspy.__file__), "highs")
+            if not os.path.exists(path_bin):
+                path_bin = os.path.join(os.path.dirname(highspy.__file__), "bin", "highs")
+            
+            solver = pl.HiGHS_CMD(path=path_bin, msg=True, timeLimit=300)
+            prob.solve(solver)
+        except Exception as e:
+            # 3ª Condição: Fallback final para o CBC (Solver padrão do PuLP)
+            print(f"    -> Falha nos solvers HiGHS. Iniciando CBC... Erro: {e}")
+            solver = pl.PULP_CBC_CMD(msg=True, timeLimit=300)
+            prob.solve(solver)
     # ---------- RESULTADOS ----------
     lista_pessoas = []
     pessoas_usadas = set()
