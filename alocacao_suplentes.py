@@ -6,12 +6,12 @@ import unicodedata
 import pandas as pd
 import os
 import os.path
-import pickle
 from datetime import datetime
 from google.oauth2.service_account import Credentials as ServiceAccountCredentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.service_account import Credentials
+from google.oauth2.credentials import Credentials as UserCredentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
@@ -233,9 +233,11 @@ def get_bot_creds():
 def get_user_creds():
     """ Usa o client_secret.json (OAuth) para logar como USUÁRIO """
     creds = None
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
-            creds = pickle.load(token)
+    if os.path.exists('token.json'):
+        try:
+            creds = UserCredentials.from_authorized_user_file('token.json', ["https://www.googleapis.com/auth/drive"])
+        except Exception:
+            creds = None
             
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
@@ -251,8 +253,8 @@ def get_user_creds():
             )
             creds = flow.run_local_server(port=0)
             
-        with open('token.pickle', 'wb') as token:
-            pickle.dump(creds, token)
+        with open('token.json', 'w') as token:
+            token.write(creds.to_json())
             
     return creds
 
