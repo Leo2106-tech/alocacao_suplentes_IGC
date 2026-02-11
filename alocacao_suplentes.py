@@ -269,7 +269,7 @@ def salvar_log_na_planilha(status, link_drive):
         NOME_DA_ABA = "Otimizar Alocação de Suplentes"
         
         # 1. Ler dados existentes (A até D) para verificar status
-        range_leitura = f"'{NOME_DA_ABA}'!A5:D"
+        range_leitura = f"'{NOME_DA_ABA}'!A2:D"
         result = service.spreadsheets().values().get(
             spreadsheetId=SPREADSHEET_ID,
             range=range_leitura
@@ -1037,4 +1037,5 @@ def main():
             print(f"\n[ERRO] Não foi possível salvar '{out}'. Feche o arquivo se ele estiver aberto.")
 
 if __name__ == "__main__":
+
     main()
