@@ -265,7 +265,6 @@ def salvar_log_na_planilha(status, link_drive):
 
     try:
         service = build('sheets', 'v4', credentials=creds)
-        
         NOME_DA_ABA = "Otimizar Alocação de Suplentes"
         
         # 1. Ler dados existentes (A até D) para verificar status
@@ -275,7 +274,9 @@ def salvar_log_na_planilha(status, link_drive):
             range=range_leitura
         ).execute()
         
-        valores = result.get('values', [])
+        # O segredo está em limpar as linhas vazias do final que o Google retorna
+        valores_brutos = result.get('values', [])
+        valores = [l for l in valores_brutos if any(str(x).strip() for x in l)]
         
         linha_alvo = -1
         atualizar_apenas_link = False
@@ -283,31 +284,28 @@ def salvar_log_na_planilha(status, link_drive):
         # Procura de baixo para cima a última linha que tem C preenchido e D vazio
         for i in range(len(valores) - 1, -1, -1):
             linha = valores[i]
-            # Verifica se tem coluna C (índice 2) e se D (índice 3) está vazia/inexistente
             tem_c = len(linha) > 2 and str(linha[2]).strip() != ""
             tem_d = len(linha) > 3 and str(linha[3]).strip() != ""
             
             if tem_c and not tem_d:
-                linha_alvo = 5 + i
+                linha_alvo = 2 + i
                 atualizar_apenas_link = True
                 break
         
-        # Se não achou linha pendente, define nova linha no final
+        # Se não achou linha pendente, define a próxima linha real com base nas ocupadas
         if linha_alvo == -1:
-            linha_alvo = 5 + len(valores)
+            linha_alvo = 2 + len(valores)
             atualizar_apenas_link = False
 
         # 2. Preparar os dados para escrita
         if atualizar_apenas_link:
-            # Se for atualizar, escreve apenas na coluna D
             valores_para_escrever = [[link_drive]]
             range_escrita = f"'{NOME_DA_ABA}'!D{linha_alvo}"
             print(f"   -> Atualizando link na linha {linha_alvo} (coluna D)...")
         else:
-            # Se for nova linha, escreve A, B, C, D
             import uuid
-            id_unico = str(uuid.uuid4())[:8] # Gera um ID curto
-            agora = datetime.now().strftime("%d/%m/%Y") # Formato de data da planilha
+            id_unico = str(uuid.uuid4())[:8]
+            agora = datetime.now().strftime("%d/%m/%Y")
             valores_para_escrever = [[id_unico, "Otimizar Suplentes Atuais", agora, link_drive]]
             range_escrita = f"'{NOME_DA_ABA}'!A{linha_alvo}"
             print(f"   -> Criando nova entrada na linha {linha_alvo}...")
@@ -1037,5 +1035,4 @@ def main():
             print(f"\n[ERRO] Não foi possível salvar '{out}'. Feche o arquivo se ele estiver aberto.")
 
 if __name__ == "__main__":
-
     main()

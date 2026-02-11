@@ -1,251 +1,237 @@
-# HiGHS - Linear optimization software
+# HiGHS CMake Build Instructions 
 
-<!-- ![Build Status](https://github.com/ERGO-Code/HiGHS/actions/workflows/build.yml/badge.svg) -->
+| OS       | C++   | Fortran | Python   | CSharp Example | .NET |
+|:-------- | :---: | :------: | :----: | :----: | :----: |
+| Linux    | [![Status][linux_cpp_svg]][linux_cpp_link] | [![Status][linux_fortran_svg]][linux_fortran_link] | [![Status][linux_python_svg]][linux_python_link] | *(1)* | [![Status][linux_dotnet_svg]][linux_dotnet_link] |
+| MacOS    | [![Status][macos_cpp_svg]][macos_cpp_link] | [![Status][macos_fortran_svg]][macos_fortran_link]  |  [![Status][macos_python_svg]][macos_python_link] | *(1)* |[![Status][macos_dotnet_svg]][macos_dotnet_link] |
+| Windows  | [![Status][windows_cpp_svg]][windows_cpp_link] | *(2)* | [![Status][windows_python_svg]][windows_python_link] | [![Status][windows_csharp_svg]][windows_csharp_link] | [![Status][windows_dotnet_svg]][windows_dotnet_link] |
 
-[![Build Status][fast_build_svg]][fast_build_link] 
-[![Build Status][linux_build_svg]][linux_build_link] 
-[![Build Status][macos_build_svg]][macos_build_link] 
-[![Build Status][windows_build_svg]][windows_build_link] 
-\
-[![Conan Center](https://img.shields.io/conan/v/highs)](https://conan.io/center/recipes/highs)
-\
-[![PyPi](https://img.shields.io/pypi/v/highspy.svg)](https://pypi.python.org/pypi/highspy)
-[![PyPi](https://img.shields.io/pypi/dm/highspy.svg)](https://pypi.python.org/pypi/highspy)
-\
-[![NuGet version](https://img.shields.io/nuget/v/Highs.Native.svg)](https://www.nuget.org/packages/Highs.Native)
-[![NuGet download](https://img.shields.io/nuget/dt/Highs.Native.svg)](https://www.nuget.org/packages/Highs.Native)
+[linux_cpp_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/cmake-linux-cpp.yml/badge.svg
+[linux_cpp_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/cmake-linux-cpp.yml
+[macos_cpp_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/cmake-macos-cpp.yml/badge.svg
+[macos_cpp_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/cmake-macos-cpp.yml
+[windows_cpp_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/cmake-windows-cpp.yml/badge.svg
+[windows_cpp_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/cmake-windows-cpp.yml
 
-[fast_build_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/build-fast.yml/badge.svg
-[fast_build_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/build-fast.yml
-[linux_build_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/build-linux.yml/badge.svg
-[linux_build_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/build-linux.yml
-[macos_build_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/build-macos.yml/badge.svg
-[macos_build_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/build-macos.yml
-[windows_build_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/build-windows.yml/badge.svg
-[windows_build_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/build-windows.yml
+[linux_python_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-python-ubuntu.yml/badge.svg
+[linux_python_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-python-ubuntu.yml
+[macos_python_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-python-macos.yml/badge.svg
+[macos_python_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-python-macos.yml
+[windows_python_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-python-win.yml/badge.svg
+[windows_python_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-python-win.yml
 
-- [About HiGHS](#about-highs)
-- [Documentation](#documentation)
-- [Installation](#installation)
-  - [Build from source using CMake](#build-from-source-using-cmake)
-  - [Build with Meson*](#build-with-meson)
-  - [Build with Nix*](#build-with-nix)
-  - [Precompiled binaries](#precompiled-binaries)
-- [Running HiGHS](#running-highs)
-- [Interfaces](#interfaces)
-  - [Python](#python)
-  - [C](#c)
-  - [CSharp](#csharp)
-  - [Fortran](#fortran)
-- [Reference](#reference)
+[windows_csharp_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-csharp-win.yml/badge.svg
+[windows_csharp_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-csharp-win.yml
 
-## About HiGHS
+[linux_dotnet_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-nuget-ubuntu.yml/badge.svg
+[linux_dotnet_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-nuget-ubuntu.yml
+[macos_dotnet_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-nuget-macos.yml/badge.svg
+[macos_dotnet_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-nuget-macos.yml
+[windows_dotnet_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-nuget-win.yml/badge.svg
+[windows_dotnet_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-nuget-win.yml
 
-HiGHS is a high performance serial and parallel solver for large scale sparse
-linear optimization problems of the form
+[linux_fortran_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-fortran-ubuntu.yml/badge.svg
+[linux_fortran_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-fortran-ubuntu.yml
+[macos_fortran_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-fortran-macos.yml/badge.svg
+[macos_fortran_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-fortran-macos.yml
+[windows_fortran_svg]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-fortran-win.yml/badge.svg
+[windows_fortran_link]: https://github.com/ERGO-Code/HiGHS/actions/workflows/test-fortran-win.yml
 
-$$ \min \quad \dfrac{1}{2}x^TQx + c^Tx \qquad \textrm{s.t.}~ \quad L \leq Ax \leq U; \quad l \leq x \leq u $$
+*(1)* CMake C# is currently only supported for Microsoft Visual Studio 11 2012 and
+  later. You can still build and run the HiGHS C# nuget package on Linux and MacOS with `dotnet`, see the workflows in the .NET column. It is only the CSharp example build with CMake that is not supported for Unix generators.
 
-where Q must be positive semi-definite and, if Q is zero, there may be a requirement that some of the variables take integer values. Thus HiGHS can solve linear programming (LP) problems, convex quadratic programming (QP) problems, and mixed integer programming (MIP) problems. It is mainly written in C++, but also has some C. It has been developed and tested on various Linux, MacOS and Windows installations. No third-party dependencies are required.
+*(2)* Not tested yet.
 
-HiGHS has primal and dual revised simplex solvers, originally written by Qi Huangfu and further developed by Julian Hall. It also has an interior point solver for LP written by Lukas Schork, an active set solver for QP written by Michael Feldmeier, and a MIP solver written by Leona Gottwald. Other features have been added by Julian Hall and Ivet Galabova, who manages the software engineering of HiGHS and interfaces to C, C#, FORTRAN, Julia and Python.
+<!--# ?branch=main -->
+<br>
 
-Find out more about HiGHS at https://www.highs.dev.
+*Contents*
 
-Although HiGHS is freely available under the MIT license, we would be pleased to learn about users' experience and give advice via email sent to highsopt@gmail.com.
+- [HiGHS CMake Build Instructions](#highs-cmake-build-instructions)
+  - [Introduction](#introduction)
+  - [Requirement](#requirement)
+  - [Supported compilers](#supported-compilers)
+- [Build](#build)
+  - [Install](#install)
+  - [Windows](#windows)
+- [CMake Options](#cmake-options)
+- [Integrating HiGHS in your CMake Project](#integrating-highs-in-your-cmake-project)
 
-## Documentation
+## Introduction 
 
-Documentation is available at https://ergo-code.github.io/HiGHS/.
+HiGHS can be built from source using CMake: <http://www.cmake.org/>. CMake works by generating native Makefiles or build projects that can be used in the compiler environment of your choice.
 
-## Installation
+HiGHS can be built as a standalone project or it could be incorporated into an existing CMake project.
 
-### Build from source using CMake
+## Requirement
+You'll need:
 
-HiGHS uses CMake as build system, and requires at least version 3.15. To generate build files in a new subdirectory called 'build', run:
+* `CMake >= 3.15`.
+* A C++11 compiler
+
+## Supported compilers 
+
+Here is a list of the supported compilers:
+
+* Clang `clang`
+* GNU `g++`
+* Intel `icc`
+* Microsoft `MSVC`
+
+# Build
+
+To build the C++ library and executable run
+
+``` bash
+cd HiGHS
+cmake -S. -B build 
+cmake --build build --parallel
+```
+
+This generates HiGHS in the `build` directory and creates the [executable](@ref Executable) `build/bin/highs`, or `build/Release/bin/highs.exe` on Windows. To perform a quick test to see whether the compilation was successful, run `ctest` from within the build folder.
+
+``` bash
+ctest 
+```
+
+On Windows, the configuration type must be specified:
+``` bash
+ctest -C Release
+```
+
+## Install
+
+The default installation location may need administrative
+permissions. To install, after building and testing, run
+
+``` bash
+cmake --install build 
+```
+
+form the root directory. 
+
+To install in a specified installation directory run CMake with the
+`CMAKE_INSTALL_PREFIX` flag set:
+
+``` bash
+cmake -S. -B build -DCMAKE_INSTALL_PREFIX=/path/to/highs_install 
+cmake --build build --parallel
+cmake --install build
+```
+
+## Windows 
+
+By default, CMake builds the debug version of the binaries. These are generated in a directory `Debug`. To build a release version, add the option `--config Release`
 
 ```shell
     cmake -S . -B build
+    cmake --build build --config Release
+```
+
+It is also possible to specify a specific Visual studio version to build with:
+```shell
+    cmake -G "Visual Studio 17 2022" -S . -B build
     cmake --build build
 ```
-This installs the executable `bin/highs` and the library `lib/highs`.
 
-To test whether the compilation was successful, change into the build directory and run
-
-```shell
-    ctest
-```
-More details on building with CMake can be found in `HiGHS/cmake/README.md`.
-
-#### Build with Meson
-
-As an alternative, HiGHS can be installed using the `meson` build interface:
-``` sh
-meson setup bbdir -Dwith_tests=True
-meson test -C bbdir
-```
-_The meson build files are provided by the community and are not officially supported by the HiGHS development team._
-
-#### Build with Nix
-
-There is a nix flake that provides the `highs` binary:
+When building under Windows, some extra options are available.  One is building a 32 bit version or a 64 bit version. The default build is 64 bit. To build 32 bit, the following commands can be used from the `HiGHS/` directory:
 
 ```shell
-nix run .
+    cmake -A Win32 -S . -B buildWin32
+    cmake --build buildWin32
 ```
 
-You can even run [without installing
-anything](https://determinate.systems/posts/nix-run/), supposing you have
-installed [nix](https://nixos.org/download.html):
+Another thing specific for windows is the calling convention, particularly important for the HiGHS dynamic library (dll). The default calling convention in windows is cdecl calling convention, however, dlls are most often compiled with stdcall. Most applications which expect stdcall, can't access dlls with cdecl and vice versa. To change the default calling convention from cdecl to stdcall the following option can be added
+```shell
+    cmake -DSTDCALL=ON -S . -B build
+    cmake --build build
+```
+
+<!-- An extra note. With the legacy `-DFAST_BUILD=OFF`, under windows the build dll is called `highs.dll` however the exe expects `libhighs.dll` so a manual copy of `highs.dll` to `libhighs.dll` is needed. Of course all above options can be combined with each other. -->
+
+
+# CMake Options
+
+There are several options that can be passed to CMake to modify how the code
+is built.<br>
+To set these options and parameters, use `-D<Parameter_name>=<value>`.
+
+All CMake options are passed at configure time, i.e., by running <br>
+`cmake -S. -B<your_chosen_build_directory> -DOPTION_ONE=ON -DOPTION_TWO=OFF ...` <br>
+before running `cmake --build <your_chosen_build_directory>`<br>
+
+For example, to generate build files in a new
+subdirectory called 'build', run:
 
 ```shell
-nix run github:ERGO-Code/HiGHS
+cmake -S. -Bbuild 
 ```
-
-The nix flake also provides the python package:
+and then build with:
 
 ```shell
-nix build .#highspy
-tree result/
+cmake --build build
 ```
 
-And a devShell for testing it:
+Following is a list of available options:
+| CMake Option | Default Value | Note |
+|:-------------|:--------------|:-----|
+| `CMAKE_BUILD_TYPE` | Release | see CMake documentation [here](https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html) |
+| `BUILD_SHARED_LIBS` | ON(*) |  Build shared libraries (.so or .dyld). * OFF by default on Windows |
+| `BUILD_CXX` | ON | Build C++ |
+| `FORTRAN` | OFF | Build Fortran interface |
+| `CSHARP` | OFF | Build CSharp wrapper |
+| `BUILD_DOTNET` | OFF | Build .Net package |
+| `PYTHON_BUILD_SETUP` | OFF | Build Python bindings. Called at `pip install` from pyproject.toml |
+| `ZLIB` | ON | Use ZLIB if available |
+| `ALL_TESTS` | OFF | Run unit tests and extended instance test set |
+
+<!-- Following is a list of available options, for the full list run:
 
 ```shell
-nix develop .#highspy
-python
->>> import highspy
->>> highspy.Highs()
-```
+cmake -S. -Bbuild -LH
+``` -->
 
-_The nix build files are provided by the community and are not officially supported by the HiGHS development team._
+HiGHS can be integrated into other CMake-based projects. 
 
-### Precompiled binaries
+# Integrating HiGHS in your CMake Project
 
-Precompiled static executables are available for a variety of platforms at
-https://github.com/JuliaBinaryWrappers/HiGHSstatic_jll.jl/releases
-
-_These binaries are provided by the Julia community and are not officially supported by the HiGHS development team. If you have trouble using these libraries, please open a GitHub issue and tag `@odow` in your question._
-
-See https://ergo-code.github.io/HiGHS/stable/installation/#Precompiled-Binaries.
-
-## Running HiGHS
-
-HiGHS can read MPS files and (CPLEX) LP files, and the following command
-solves the model in `ml.mps`
-
-```shell
-    highs ml.mps
-```
-#### Command line options
-
-When HiGHS is run from the command line, some fundamental option values may be
-specified directly. Many more may be specified via a file. Formally, the usage
-is:
-
-```shell
-$ bin/highs --help
-usage:
-      ./bin/highs [options] [file]
-
-options:
-      --model_file file          File of model to solve.
-      --options_file file        File containing HiGHS options.
-      --read_solution_file file  File of solution to read.
-      --read_basis_file text     File of initial basis to read. 
-      --write_model_file text    File for writing out model.
-      --solution_file text       File for writing out solution.
-      --write_basis_file text    File for writing out final basis.
-      --presolve text            Set presolve option to:
-                                   "choose" * default 
-                                   "on"
-                                   "off"
-      --solver text              Set solver option to: 
-                                   "choose" * default 
-                                   "simplex"
-                                   "ipm" 
-      --parallel text            Set parallel option to: 
-                                   "choose" * default 
-                                   "on" 
-                                   "off" 
-      --run_crossover text       Set run_crossover option to: 
-                                   "choose" 
-                                   "on" * default 
-                                   "off" 
-      --time_limit float         Run time limit (seconds - double).
-      --random_seed int          Seed to initialize random number 
-                                 generation.
-      --ranging text             Compute cost, bound, RHS and basic 
-                                 solution ranging:
-                                   "on" 
-                                   "off" * default 
-  -v, --version                  Print version.
-  -h, --help                     Print help. 
+If you already have HiGHS installed on your system, you can use `find_package()` to include HiGHS in your C++ CMake project. 
 
 ```
-For a full list of options, see the [options page](https://ergo-code.github.io/HiGHS/stable/options/definitions/) of the documentation website.
+project(LOAD_HIGHS LANGUAGES CXX)
 
-## Interfaces
+set(HIGHS_DIR path_to_highs_install/lib/cmake/highs)
 
-There are HiGHS interfaces for C, C#, FORTRAN, and Python in `HiGHS/highs/interfaces`, with example driver files in `HiGHS/examples/`. More on language and modelling interfaces can be found at https://ergo-code.github.io/HiGHS/stable/interfaces/other/.
+find_package(HIGHS REQUIRED)
 
-We are happy to give a reasonable level of support via email sent to highsopt@gmail.com.
-
-### Python
-
-The python package `highspy` is a thin wrapper around HiGHS and is available on [PyPi](https://pypi.org/project/highspy/). It can be easily installed via `pip` by running
-
-```shell
-$ pip install highspy
+add_executable(main main.cpp)
+target_link_libraries(main highs::highs)
 ```
 
-Alternatively, `highspy` can be built from source.  Download the HiGHS source code and run
-
-```shell
-pip install .
+The line 
 ```
-from the root directory.
-
-The HiGHS C++ library no longer needs to be separately installed. The python package `highspy` depends on the `numpy` package and `numpy` will be installed as well, if it is not already present.
-
-The installation can be tested using the small example `HiGHS/examples/call_highs_from_python_highspy.py`.
-
-The [Google Colab Example Notebook](https://colab.research.google.com/drive/1JmHF53OYfU-0Sp9bzLw-D2TQyRABSjHb?usp=sharing) also demonstrates how to call `highspy`.
-
-### C 
-The C API is in `HiGHS/highs/interfaces/highs_c_api.h`. It is included in the default build. For more details, check out the documentation website https://ergo-code.github.io/HiGHS/.
-
-### CSharp
-
-The nuget package Highs.Native is on https://www.nuget.org, at https://www.nuget.org/packages/Highs.Native/. 
-
-It can be added to your C# project with `dotnet`
-
-```shell
-dotnet add package Highs.Native --version 1.11.0
+set(HIGHS_DIR path_to_highs_install/lib/cmake/highs)
+```
+adds the HiGHS installation path to `HIGHS_DIR`. This is equivalent to building this project with
+``` bash
+cmake -DHIGHS_DIR=path_to_highs_install/lib/cmake/highs ..
 ```
 
-The nuget package contains runtime libraries for 
+Alternatively, if you wish to include the code of HiGHS within your project, FetchContent is also available as follows: 
 
-* `win-x64`
-* `win-x32`
-* `linux-x64`
-* `linux-arm64`
-* `macos-x64`
-* `macos-arm64`
+```
+project(LOAD_HIGHS LANGUAGES CXX)
 
-Details for building locally can be found in `nuget/README.md`.
+include(FetchContent)
 
-### Fortran 
+FetchContent_Declare(
+    highs
+    GIT_REPOSITORY "https://github.com/ERGO-Code/HiGHS.git"
+    GIT_TAG        "latest"
+)
 
-The Fortran API is in `HiGHS/highs/interfaces/highs_fortran_api.f90`. It is *not* included in the default build. For more details, check out the documentation website https://ergo-code.github.io/HiGHS/.
+FetchContent_MakeAvailable(highs)
 
-
-## Reference
-
-If you use HiGHS in an academic context, please acknowledge this and cite the following article.
-
-Parallelizing the dual revised simplex method
-Q. Huangfu and J. A. J. Hall
-Mathematical Programming Computation, 10 (1), 119-142, 2018.
-DOI: [10.1007/s12532-017-0130-5](https://link.springer.com/article/10.1007/s12532-017-0130-5)
+add_executable(main call_from_cpp.cc)
+target_link_libraries(main highs::highs)
+```
